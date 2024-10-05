@@ -11,7 +11,7 @@ https://tailwindcss.com/docs/guides/vite
 
 I have a relatively small Instagram growth company called powergram, more info can be found on www.powergram.nl. I use different online tools and automation on phones on the official Instagram app to grow clients Instagram pages.
 The way the service works. The client gives a list of Instagram usernames they think are similar to their own or their competitors. We then use the software to automate their growth by interacting with the followers or likers of these pages.
-The problem :
+The problem  :
 
 
 
