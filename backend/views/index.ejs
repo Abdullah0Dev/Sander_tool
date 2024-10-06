@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Instagram Basic Display API</title>
+</head>
+<body>
+    <h1>Instagram Basic Display API</h1>
+    <hr />
+    <% if (user) { %>
+        <h2>Username: <%= user.username %></h2>
+        <h2>ID: <%= user.id %></h2>
+        <h2>Media Count: <%= user.media_count %></h2>
+        <h2>Account Type: <%= user.account_type %></h2>
+
+        <h3>Highlighted Post</h3>
+        <div>
+            <img src="<%= media.media_url %>" style="height:320px" />
+            <p><b>Caption: <%= media.caption %></b></p>
+            <p>Posted by: <%= media.username %> at <%= media.timestamp %></p>
+            <p>Link: <a href="<%= media.permalink %>" target="_blank">View on Instagram</a></p>
+        </div>
+
+        <h3>Media Children</h3>
+        <div>
+            <% mediaChildren.data.forEach(child => { %>
+                <% if (child.media_type === 'IMAGE') { %>
+                    <img src="<%= child.media_url %>" style="height:320px" />
+                <% } else { %>
+                    <video height="240" width="320" controls>
+                        <source src="<%= child.media_url %>">
+                    </video>
+                <% } %>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <a href="<%= ig.getAuthorizationUrl() %>">Authorize w/Instagram</a>
+    <% } %>
+</body>
+</html>

@@ -1,23 +1,93 @@
-const express = require('express');
+const express = require("express");
+const path = require("path");
+const InstagramAPI = require("./instagram");
+const dotenv = require("dotenv");
+dotenv.config();
 
-const app = express(); // Corrected the typo here
+const app = express();
+const port = 3000;
 
-const port = 3000; // You can change the port if needed
+// Set EJS as the template engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-app.get('/', (req, res) => {
-  res.send('Hello World!'); // Basic route example
+// // Route for the homepage
+// app.get('/', async (req, res) => {
+//     const accessToken =   `EAAGSGUNYC88BO8DsI3eToY243F9NVOsu87ZBmeVNcZAHpmLtZCiBbvdhaXOZC7AgtEPsyZCxziZAvyuXJQZCeQCVBVC9XQXMSDuXsnieaYwBHQIj6XZAxAaDZB52bVLLqgSVabZALs7nMn4i6ZAzXYInTQZBZCzoe8MU4ZCjFU5YW2ZCYgySBZBvDbFeuOnC5IFUk9uA3SPLe8J087bAt0fDYFqD2vTMk7HMCi4qipTf9aejL6E0FOHZCwBiPlO5oBMrExHbJJAZDZD` // Placeholder
+//     const userId = 'webmind1s'; // Placeholder
+
+//     const ig = new InstagramAPI({
+//         getCode: req.query.code || '',
+//         accessToken,
+//         userId
+//     });
+
+//     if (ig.hasUserAccessToken) {
+//         const user = await ig.getUser();
+//         const highlightedPostId = '17841405793187218'; // Set your media ID here
+//         const media = await ig.getMedia(highlightedPostId);
+//         const mediaChildren = await ig.getMediaChildren(highlightedPostId);
+
+//         return res.render('index', { user, media, mediaChildren });
+//     } else {
+//         return res.redirect(ig.getAuthorizationUrl());
+
+//     }
+// });
+
+app.get("/auth", (req, res) => {
+  const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${process.env.INSTAGRAM_REDIRECT_URI}&scope=user_profile,user_media&response_type=code`;
+  console.log('Auth URL:', authUrl); // Log the URL to verify
+
+  res.redirect(authUrl);
 });
 
-// routes
-// app.use('/api/')
-// app.get('https://graph.facebook.com/v12.0/{ig-user-id}?fields=business_discovery.username({ig-username}){username,website,name,ig_id,id,profile_picture_url,biography,follows_count,followers_count,media_count,media{id,caption,like_count,comments_count,timestamp,username,media_product_type,media_type,owner,permalink,media_url,children{media_url}}}&access_token={access-token}', {
-//   return 
-// })
+app.get("/auth/callback", async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    const response = await axios.post(
+      "https://api.instagram.com/oauth/access_token",
+      {
+        client_id: process.env.INSTAGRAM_CLIENT_ID,
+
+        client_secret: process.env.INSTAGRAM_CLIENT_SECRET,
+
+        grant_type: "authorization_code",
+
+        redirect_uri: process.env.INSTAGRAM_REDIRECT_URI,
+
+        code,
+      }
+    );
+
+    const { access_token } = response.data;
+
+    res.send(`Access Token: ${access_token}`);
+    console.log(access_token);
+  } catch (error) {
+    res.status(500).send("Error during authentication");
+  }
+});
+
+app.get('/user', async (req, res) => {
+
+  const { access_token } = req.query; // Use the access token obtained earlier
+  
+  try {
+  
+  const response = await axios.get(`https://graph.instagram.com/me?fields=id,username&access_token=${access_token}`);
+  
+  res.json(response.data);
+  
+  } catch (error) {
+  
+  res.status(500).send('Error fetching user data');
+  
+  }
+  
+  });
+
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running at http://localhost:${port}/auth`);
 });
-
-
-//   'https://graph.instagram.com/17895695668004550?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJ...'
-//https://developers.facebook.com/apps/1196642134912783/add/?business_id=1056317869373218
-// 	$endpointFormat = 'https://graph.facebook.com/v12.0/{ig-user-id}?fields=business_discovery.username({ig-username}){username,website,name,ig_id,id,profile_picture_url,biography,follows_count,followers_count,media_count,media{id,caption,like_count,comments_count,timestamp,username,media_product_type,media_type,owner,permalink,media_url,children{media_url}}}&access_token={access-token}
